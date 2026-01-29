@@ -40,7 +40,7 @@ class App:
         # --- UI ---
         self._setup_style()
 
-        main = ttk.Frame(root, padding=12, style="App.TFrame")
+        main = ttk.Frame(root, padding=8, style="App.TFrame")
         main.grid(row=0, column=0, sticky="nsew")
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
@@ -61,7 +61,7 @@ class App:
             command=self.on_get,
             style="Accent.TButton",
         )
-        self.btn_get.grid(row=0, column=0, padx=(0, 8), pady=(0, 8), sticky="w")
+        self.btn_get.grid(row=0, column=0, padx=(0, 6), pady=(0, 6), sticky="w")
 
         ttk.Button(actions, text="Remove", command=self.on_remove).grid(
             row=0, column=1, padx=(0, 8), pady=(0, 8), sticky="w"
@@ -86,12 +86,14 @@ class App:
         ttk.Entry(timing, textvariable=self.interval_ms, width=6).grid(
             row=0, column=3, padx=(6, 12), pady=(0, 8)
         )
+        ttk.Label(timing, text="ms", style="Muted.TLabel").grid(row=0, column=2, sticky="w")
 
         ttk.Label(timing, text="Ms delay:", style="Muted.TLabel").grid(row=0, column=4, sticky="e")
         self.start_delay = tk.StringVar(value="0")
         ttk.Entry(timing, textvariable=self.start_delay, width=6).grid(
             row=0, column=5, padx=(6, 12), pady=(0, 8)
         )
+        ttk.Label(timing, text="s", style="Muted.TLabel").grid(row=0, column=5, sticky="w")
 
         ttk.Label(timing, text="Repeat:", style="Muted.TLabel").grid(row=0, column=6, sticky="e")
         self.repeat_count = tk.StringVar(value="0")
@@ -120,7 +122,7 @@ class App:
             points_card,
             text="Order matters. Use the arrows to reorder points.",
             style="Muted.TLabel",
-        ).grid(row=0, column=0, sticky="w", pady=(0, 6))
+        ).grid(row=0, column=0, sticky="w", pady=(0, 4))
 
         table_frame = ttk.Frame(points_card, style="App.TFrame")
         table_frame.grid(row=1, column=0, sticky="nsew")
@@ -131,13 +133,13 @@ class App:
             table_frame,
             columns=("x", "y"),
             show="headings",
-            height=7,
+            height=5,
             selectmode="extended",
         )
         self.points_table.heading("x", text="X")
         self.points_table.heading("y", text="Y")
-        self.points_table.column("x", width=80, anchor="center")
-        self.points_table.column("y", width=80, anchor="center")
+        self.points_table.column("x", width=60, anchor="center")
+        self.points_table.column("y", width=60, anchor="center")
         self.points_table.grid(row=0, column=0, sticky="nsew")
 
         sb = ttk.Scrollbar(table_frame, orient="vertical", command=self.points_table.yview)
@@ -145,7 +147,7 @@ class App:
         self.points_table.configure(yscrollcommand=sb.set)
 
         reorder = ttk.Frame(points_card, style="App.TFrame")
-        reorder.grid(row=2, column=0, sticky="w", pady=(6, 0))
+        reorder.grid(row=2, column=0, sticky="w", pady=(4, 0))
         ttk.Button(reorder, text="Move up", command=self.on_move_up).grid(
             row=0, column=0, padx=(0, 8)
         )
@@ -336,25 +338,25 @@ class App:
         style.configure("Card.TLabelframe", background="#ffffff", foreground="#0f172a")
         style.configure("Card.TLabelframe.Label", background="#ffffff", foreground="#0f172a")
         style.configure(
-            "Header.TLabel", background="#f1f5f9", foreground="#0f172a", font=("Segoe UI", 16, "bold")
+            "Header.TLabel", background="#f1f5f9", foreground="#0f172a", font=("Segoe UI", 13, "bold")
         )
         style.configure(
-            "Subheader.TLabel", background="#f1f5f9", foreground="#475569", font=("Segoe UI", 9)
+            "Subheader.TLabel", background="#f1f5f9", foreground="#475569", font=("Segoe UI", 8)
         )
-        style.configure("Muted.TLabel", background="#ffffff", foreground="#64748b", font=("Segoe UI", 9))
+        style.configure("Muted.TLabel", background="#ffffff", foreground="#64748b", font=("Segoe UI", 8))
         style.configure("Status.TFrame", background="#e2e8f0")
         style.configure(
-            "Status.TLabel", background="#e2e8f0", foreground="#334155", font=("Segoe UI", 9)
+            "Status.TLabel", background="#e2e8f0", foreground="#334155", font=("Segoe UI", 8)
         )
         style.configure(
-            "Accent.TButton", background="#2563eb", foreground="#f8fafc", font=("Segoe UI", 9, "bold")
+            "Accent.TButton", background="#2563eb", foreground="#f8fafc", font=("Segoe UI", 8, "bold")
         )
         style.map(
             "Accent.TButton",
             background=[("active", "#3b82f6")],
             foreground=[("active", "#f8fafc")],
         )
-        style.configure("TButton", padding=(6, 4))
+        style.configure("TButton", padding=(4, 3))
         style.configure("TEntry", fieldbackground="#ffffff", foreground="#0f172a")
         style.configure("TCombobox", fieldbackground="#ffffff", foreground="#0f172a")
         style.map(
@@ -367,7 +369,7 @@ class App:
             background="#ffffff",
             foreground="#0f172a",
             fieldbackground="#ffffff",
-            rowheight=22,
+            rowheight=18,
         )
         style.configure("Treeview.Heading", background="#e2e8f0", foreground="#0f172a")
 
