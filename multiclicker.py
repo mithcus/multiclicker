@@ -54,20 +54,21 @@ class App:
 
         actions = ttk.Frame(controls, style="App.TFrame")
         actions.grid(row=0, column=0, sticky="ew")
-        actions.columnconfigure(2, weight=1)
+        actions.columnconfigure((0, 1, 2), weight=1, uniform="action_buttons")
 
         self.btn_get = ttk.Button(
             actions,
             text="Capture next click",
             command=self.on_get,
+            width=18,
         )
-        self.btn_get.grid(row=0, column=0, padx=(0, 6), pady=(0, 6), sticky="w")
+        self.btn_get.grid(row=0, column=0, padx=(0, 6), pady=(0, 6), sticky="ew")
 
-        ttk.Button(actions, text="Remove", command=self.on_remove).grid(
-            row=0, column=1, padx=(0, 8), pady=(0, 8), sticky="w"
+        ttk.Button(actions, text="Remove", command=self.on_remove, width=18).grid(
+            row=0, column=1, padx=(0, 8), pady=(0, 8), sticky="ew"
         )
-        ttk.Button(actions, text="Clear", command=self.on_clear).grid(
-            row=0, column=2, padx=(0, 8), pady=(0, 8), sticky="w"
+        ttk.Button(actions, text="Clear", command=self.on_clear, width=18).grid(
+            row=0, column=2, padx=(0, 8), pady=(0, 8), sticky="ew"
         )
 
         timing = ttk.Frame(controls, style="App.TFrame")
@@ -89,11 +90,11 @@ class App:
         ttk.Label(timing, text="ms", style="Muted.TLabel").grid(row=0, column=4, sticky="w")
 
         ttk.Label(timing, text="Delay:", style="Muted.TLabel").grid(row=1, column=0, sticky="e")
+        delay_frame = ttk.Frame(timing, style="App.TFrame")
+        delay_frame.grid(row=1, column=1, padx=(6, 6), pady=(0, 8), sticky="w")
         self.start_delay = tk.StringVar(value="0")
-        ttk.Entry(timing, textvariable=self.start_delay, width=6).grid(
-            row=1, column=1, padx=(6, 6), pady=(0, 8), sticky="w"
-        )
-        ttk.Label(timing, text="ms", style="Muted.TLabel").grid(row=1, column=2, sticky="w")
+        ttk.Entry(delay_frame, textvariable=self.start_delay, width=6).grid(row=0, column=0, sticky="w")
+        ttk.Label(delay_frame, text="ms", style="Muted.TLabel").grid(row=0, column=1, padx=(4, 0))
 
         ttk.Label(timing, text="Repeat:", style="Muted.TLabel").grid(row=1, column=3, sticky="e")
         self.repeat_count = tk.StringVar(value="0")
@@ -151,8 +152,9 @@ class App:
         run_actions = ttk.Frame(main, style="App.TFrame")
         run_actions.grid(row=2, column=0, sticky="ew", pady=(10, 0))
         run_actions.columnconfigure(0, weight=1)
+        ttk.Label(run_actions, text="F9", style="Hint.TLabel").grid(row=0, column=0)
         buttons = ttk.Frame(run_actions, style="App.TFrame")
-        buttons.grid(row=0, column=0)
+        buttons.grid(row=1, column=0)
         self.btn_start = ttk.Button(buttons, text="Start", command=self.on_start, width=12)
         self.btn_start.grid(row=0, column=0, padx=(0, 8))
         self.btn_stop = ttk.Button(buttons, text="Stop", command=self.on_stop, state="disabled", width=12)
@@ -174,6 +176,8 @@ class App:
         except Exception:
             messagebox.showerror("Missing dependency", "xdotool not found. Install: sudo apt install xdotool")
             self.status.set("xdotool missing.")
+
+        self.root.bind_all("<F9>", self.on_toggle_hotkey)
 
     def on_get(self):
         # Arm capture mode: next LEFT click anywhere will be captured
@@ -292,6 +296,12 @@ class App:
         self.btn_stop.configure(state="disabled")
         self.status.set("Stopped.")
 
+    def on_toggle_hotkey(self, _event=None):
+        if self.running:
+            self.on_stop()
+        else:
+            self.on_start()
+
     def loop(self, interval_ms, delay_s, repeat_count):
         btn = CLICK_BUTTON.get(self.click_type.get(), "1")
         interval_s = max(interval_ms / 1000.0, 0)
@@ -349,6 +359,7 @@ class App:
             "Subheader.TLabel", background="#f1f5f9", foreground="#475569", font=("Segoe UI", 8)
         )
         style.configure("Muted.TLabel", background="#ffffff", foreground="#64748b", font=("Segoe UI", 8))
+        style.configure("Hint.TLabel", background="#f1f5f9", foreground="#94a3b8", font=("Segoe UI", 7))
         style.configure("Status.TFrame", background="#e2e8f0")
         style.configure(
             "Status.TLabel", background="#e2e8f0", foreground="#334155", font=("Segoe UI", 8)
@@ -363,6 +374,7 @@ class App:
         )
         style.configure("Small.TButton", padding=(3, 1), font=("Segoe UI", 7))
         style.configure("TButton", padding=(4, 3))
+        style.map("TButton", foreground=[("disabled", "#94a3b8")])
         style.configure("TEntry", fieldbackground="#ffffff", foreground="#0f172a")
         style.configure("TCombobox", fieldbackground="#ffffff", foreground="#0f172a")
         style.map(
