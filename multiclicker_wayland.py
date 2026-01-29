@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import shutil
 import subprocess
 import threading
@@ -40,6 +41,7 @@ class App:
         self.capture_mode = False
         self.capture_overlay = None
         self.root.bind_all("<F9>", self._on_f9)
+        self.ydotool_socket = os.environ.get("YDOTOOL_SOCKET", "/tmp/ydotoold.sock")
 
         # --- UI ---
         self._setup_style()
@@ -182,6 +184,13 @@ class App:
                 "ydotool not found. Install ydotool (Wayland).",
             )
             self.status.set("ydotool missing.")
+        elif not os.path.exists(self.ydotool_socket):
+            messagebox.showwarning(
+                "ydotool daemon not running",
+                "ydotoold socket not found. Start it, for example:\n"
+                "sudo ydotoold --socket-path=/tmp/ydotoold.sock",
+            )
+            self.status.set("ydotoold not running.")
 
     def on_get(self):
         # Arm capture mode: fullscreen overlay lets us grab a point anywhere on-screen.
@@ -198,8 +207,12 @@ class App:
         self.capture_overlay = overlay
         overlay.overrideredirect(True)
         overlay.attributes("-topmost", True)
-        overlay.attributes("-alpha", 0.01)
+        overlay.attributes("-alpha", 0.0)
         overlay.configure(cursor="crosshair", bg="black")
+        try:
+            overlay.attributes("-transparentcolor", "black")
+        except tk.TclError:
+            pass
         overlay.geometry(self._screen_geometry())
         overlay.update_idletasks()
         overlay.lift()
@@ -338,6 +351,10 @@ class App:
         self.on_toggle_hotkey()
 
     def loop(self, interval_ms, delay_s, repeat_count):
+        if not os.path.exists(self.ydotool_socket):
+            self.root.after(0, lambda: self.status.set("ydotoold not running."))
+            self.root.after(0, self.on_stop)
+            return
         btn = CLICK_BUTTON.get(self.click_type.get(), "1")
         interval_s = max(interval_ms / 1000.0, 0)
 
@@ -355,6 +372,8 @@ class App:
             ox = oy = None
             if self.restore_mouse.get():
                 try:
+                    if not os.path.exists(self.ydotool_socket):
+                        raise FileNotFoundError
                     ox, oy = get_mouse_xy()
                 except Exception:
                     ox = oy = None
