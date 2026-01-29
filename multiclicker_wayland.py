@@ -39,7 +39,7 @@ class App:
 
         # Capture state
         self.capture_mode = False
-        self.capture_overlay = None
+        self.capture_delay_s = 1.0
         self.root.bind_all("<F9>", self._on_f9)
         self.ydotool_socket = os.environ.get("YDOTOOL_SOCKET", "/tmp/ydotoold.sock")
 
@@ -186,63 +186,37 @@ class App:
             )
 
     def on_get(self):
-        # Arm capture mode: fullscreen overlay lets us grab a point anywhere on-screen.
+        # Arm capture mode: hide the window and capture current cursor position after delay.
         if self.capture_mode:
             return
         self.capture_mode = True
-        self.status.set("Capture mode: click anywhere to add a point (Esc to cancel).")
-        self._start_overlay_capture()
+        self.status.set(
+            f"Capture mode: move cursor, capturing in {self.capture_delay_s:.1f}s..."
+        )
+        self.root.withdraw()
+        threading.Thread(target=self._capture_after_delay, daemon=True).start()
 
-    def _start_overlay_capture(self):
-        if self.capture_overlay is not None:
+    def _capture_after_delay(self):
+        time.sleep(self.capture_delay_s)
+        if not os.path.exists(self.ydotool_socket):
+            self.root.after(0, lambda: self._finish_capture_error("ydotoold not running."))
             return
-        overlay = tk.Toplevel(self.root)
-        self.capture_overlay = overlay
-        overlay.overrideredirect(True)
-        overlay.attributes("-topmost", True)
-        overlay.attributes("-alpha", 0.0)
-        overlay.configure(cursor="crosshair", bg="black")
         try:
-            overlay.attributes("-transparentcolor", "black")
-        except tk.TclError:
-            pass
-        overlay.geometry(self._screen_geometry())
-        overlay.update_idletasks()
-        overlay.lift()
-        overlay.grab_set()
-        overlay.bind("<Button-1>", self._on_overlay_click)
-        overlay.bind("<Escape>", self._on_overlay_cancel)
-        overlay.focus_set()
+            x, y = get_mouse_xy()
+        except Exception:
+            self.root.after(0, lambda: self._finish_capture_error("Could not read cursor position."))
+            return
+        self.root.after(0, lambda: self._add_point_from_capture(x, y))
 
-    def _screen_geometry(self):
-        width = self.root.winfo_screenwidth()
-        height = self.root.winfo_screenheight()
-        return f"{width}x{height}+0+0"
-
-    def _on_overlay_click(self, event):
-        x, y = int(event.x_root), int(event.y_root)
-        self._end_overlay_capture()
-        self._add_point_from_capture(x, y)
-
-    def _on_overlay_cancel(self, _event=None):
-        self._end_overlay_capture()
-        self.status.set("Capture cancelled.")
+    def _finish_capture_error(self, message):
+        self.root.deiconify()
+        self.root.lift()
+        self.status.set(message)
         self.capture_mode = False
 
-    def _end_overlay_capture(self):
-        if self.capture_overlay is None:
-            return
-        try:
-            self.capture_overlay.grab_release()
-        except Exception:
-            pass
-        try:
-            self.capture_overlay.destroy()
-        except Exception:
-            pass
-        self.capture_overlay = None
-
     def _add_point_from_capture(self, x, y):
+        self.root.deiconify()
+        self.root.lift()
         self.points.append((int(x), int(y)))
         self.points_table.insert("", tk.END, values=(int(x), int(y)))
         self.status.set(f"Added point: {int(x)}, {int(y)}")
@@ -334,6 +308,13 @@ class App:
         self.btn_stop.configure(state="disabled")
         self.status.set("Stopped.")
 
+    def stop_with_status(self, message):
+        self.stop_event.set()
+        self.running = False
+        self.btn_start.configure(state="normal")
+        self.btn_stop.configure(state="disabled")
+        self.status.set(message)
+
     def on_toggle_hotkey(self, _event=None):
         if self.running:
             self.on_stop()
@@ -345,8 +326,7 @@ class App:
 
     def loop(self, interval_ms, delay_s, repeat_count):
         if not os.path.exists(self.ydotool_socket):
-            self.root.after(0, lambda: self.status.set("ydotoold not running."))
-            self.root.after(0, self.on_stop)
+            self.root.after(0, lambda: self.stop_with_status("ydotoold not running."))
             return
         btn = CLICK_BUTTON.get(self.click_type.get(), "1")
         interval_s = max(interval_ms / 1000.0, 0)
