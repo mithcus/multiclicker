@@ -177,13 +177,9 @@ class App:
             sticky="w",
         )
 
-        # Dependency sanity check
+        # Dependency sanity check (informational only; enforced on Start)
         if not shutil.which("ydotool"):
             self.status.set("ydotool missing. Install ydotool (Wayland).")
-        elif not os.path.exists(self.ydotool_socket):
-            self.status.set(
-                "ydotoold socket not found. Start ydotoold before clicking."
-            )
 
     def on_get(self):
         # Arm capture mode: hide the window and capture current cursor position after delay.
@@ -193,11 +189,9 @@ class App:
         self.status.set(
             f"Capture mode: move cursor, capturing in {self.capture_delay_s:.1f}s..."
         )
-        self.root.withdraw()
-        threading.Thread(target=self._capture_after_delay, daemon=True).start()
+        self.root.after(int(self.capture_delay_s * 1000), self._capture_after_delay)
 
     def _capture_after_delay(self):
-        time.sleep(self.capture_delay_s)
         try:
             x, y = self.root.winfo_pointerxy()
         except Exception:
@@ -206,14 +200,10 @@ class App:
         self.root.after(0, lambda: self._add_point_from_capture(x, y))
 
     def _finish_capture_error(self, message):
-        self.root.deiconify()
-        self.root.lift()
         self.status.set(message)
         self.capture_mode = False
 
     def _add_point_from_capture(self, x, y):
-        self.root.deiconify()
-        self.root.lift()
         self.points.append((int(x), int(y)))
         self.points_table.insert("", tk.END, values=(int(x), int(y)))
         self.status.set(f"Added point: {int(x)}, {int(y)}")
@@ -260,6 +250,18 @@ class App:
 
     def on_start(self):
         if self.running:
+            return
+        if not shutil.which("ydotool"):
+            messagebox.showerror("Missing dependency", "ydotool not found. Install ydotool.")
+            self.status.set("ydotool missing.")
+            return
+        if not os.path.exists(self.ydotool_socket):
+            messagebox.showerror(
+                "ydotoold not running",
+                "ydotoold socket not found. Start it, for example:\n"
+                "sudo ydotoold --socket-path=/tmp/ydotoold.sock",
+            )
+            self.status.set("ydotoold not running.")
             return
         if not self.points:
             messagebox.showwarning("No points", "Add at least one point.")
