@@ -38,6 +38,7 @@ class App:
 
         # Capture state
         self.capture_mode = False
+        self.capture_overlay = None
         self.root.bind_all("<F9>", self._on_f9)
 
         # --- UI ---
@@ -175,57 +176,53 @@ class App:
         )
 
         # Dependency sanity check
-        missing = []
         if not shutil.which("ydotool"):
-            missing.append("ydotool")
-        if not shutil.which("slurp"):
-            missing.append("slurp")
-        if missing:
             messagebox.showerror(
                 "Missing dependency",
-                "Missing tools: "
-                + ", ".join(missing)
-                + ". Install ydotool + slurp (Wayland).",
+                "ydotool not found. Install ydotool (Wayland).",
             )
-            self.status.set("Missing dependencies: " + ", ".join(missing))
+            self.status.set("ydotool missing.")
 
     def on_get(self):
-        # Arm capture mode: slurp lets us grab a point anywhere on the screen.
+        # Arm capture mode: fullscreen overlay lets us grab a point anywhere on-screen.
         if self.capture_mode:
             return
         self.capture_mode = True
-        self.status.set("Capture mode: click anywhere to add a point.")
-        threading.Thread(target=self._capture_point, daemon=True).start()
+        self.status.set("Capture mode: click anywhere to add a point (Esc to cancel).")
+        self._start_overlay_capture()
 
-    def _capture_point(self):
+    def _start_overlay_capture(self):
+        if self.capture_overlay is not None:
+            return
+        overlay = tk.Toplevel(self.root)
+        self.capture_overlay = overlay
+        overlay.attributes("-fullscreen", True)
+        overlay.attributes("-topmost", True)
+        overlay.attributes("-alpha", 0.01)
+        overlay.configure(cursor="crosshair", bg="black")
+        overlay.overrideredirect(True)
+        overlay.bind("<Button-1>", self._on_overlay_click)
+        overlay.bind("<Escape>", self._on_overlay_cancel)
+        overlay.focus_set()
+
+    def _on_overlay_click(self, event):
+        x, y = int(event.x_root), int(event.y_root)
+        self._end_overlay_capture()
+        self._add_point_from_capture(x, y)
+
+    def _on_overlay_cancel(self, _event=None):
+        self._end_overlay_capture()
+        self.status.set("Capture cancelled.")
+        self.capture_mode = False
+
+    def _end_overlay_capture(self):
+        if self.capture_overlay is None:
+            return
         try:
-            output = subprocess.check_output(
-                ["slurp", "-p", "-f", "%x %y"],
-                text=True,
-            ).strip()
-        except FileNotFoundError:
-            self.root.after(0, lambda: self.status.set("slurp not found."))
-            self.capture_mode = False
-            return
-        except subprocess.CalledProcessError:
-            self.root.after(0, lambda: self.status.set("Capture cancelled."))
-            self.capture_mode = False
-            return
-
-        if not output:
-            self.root.after(0, lambda: self.status.set("No point captured."))
-            self.capture_mode = False
-            return
-
-        try:
-            x_str, y_str = output.split()
-            x, y = int(float(x_str)), int(float(y_str))
-        except ValueError:
-            self.root.after(0, lambda: self.status.set("Capture output invalid."))
-            self.capture_mode = False
-            return
-
-        self.root.after(0, lambda: self._add_point_from_capture(x, y))
+            self.capture_overlay.destroy()
+        except Exception:
+            pass
+        self.capture_overlay = None
 
     def _add_point_from_capture(self, x, y):
         self.points.append((int(x), int(y)))
