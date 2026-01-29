@@ -5,7 +5,7 @@ import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from pynput import mouse
+from pynput import mouse, keyboard
 
 CLICK_BUTTON = {
     "Left": "1",
@@ -37,6 +37,8 @@ class App:
         self.capture_mode = False
         self.mouse_listener = mouse.Listener(on_click=self._on_global_click)
         self.mouse_listener.start()
+        self.keyboard_listener = keyboard.Listener(on_press=self._on_global_key)
+        self.keyboard_listener.start()
 
         # --- UI ---
         self._setup_style()
@@ -54,21 +56,22 @@ class App:
 
         actions = ttk.Frame(controls, style="App.TFrame")
         actions.grid(row=0, column=0, sticky="ew")
+        actions.columnconfigure(0, weight=1)
+        actions.columnconfigure(1, weight=1)
         actions.columnconfigure(2, weight=1)
 
         self.btn_get = ttk.Button(
             actions,
             text="Capture next click",
             command=self.on_get,
+            width=16,
         )
-        self.btn_get.grid(row=0, column=0, padx=(0, 6), pady=(0, 6), sticky="w")
+        self.btn_get.grid(row=0, column=0, padx=(0, 6), pady=(0, 6), sticky="ew")
 
-        ttk.Button(actions, text="Remove", command=self.on_remove).grid(
-            row=0, column=1, padx=(0, 8), pady=(0, 8), sticky="w"
-        )
-        ttk.Button(actions, text="Clear", command=self.on_clear).grid(
-            row=0, column=2, padx=(0, 8), pady=(0, 8), sticky="w"
-        )
+        self.btn_remove = ttk.Button(actions, text="Remove", command=self.on_remove, width=16)
+        self.btn_remove.grid(row=0, column=1, padx=(0, 6), pady=(0, 6), sticky="ew")
+        self.btn_clear = ttk.Button(actions, text="Clear", command=self.on_clear, width=16)
+        self.btn_clear.grid(row=0, column=2, padx=(0, 0), pady=(0, 6), sticky="ew")
 
         timing = ttk.Frame(controls, style="App.TFrame")
         timing.grid(row=1, column=0, sticky="ew")
@@ -91,9 +94,9 @@ class App:
         ttk.Label(timing, text="Delay:", style="Muted.TLabel").grid(row=1, column=0, sticky="e")
         self.start_delay = tk.StringVar(value="0")
         ttk.Entry(timing, textvariable=self.start_delay, width=6).grid(
-            row=1, column=1, padx=(6, 6), pady=(0, 8), sticky="w"
+            row=1, column=1, padx=(6, 2), pady=(0, 8), sticky="w"
         )
-        ttk.Label(timing, text="ms", style="Muted.TLabel").grid(row=1, column=2, sticky="w")
+        ttk.Label(timing, text="ms", style="Muted.TLabel").grid(row=1, column=2, padx=(0, 12), sticky="w")
 
         ttk.Label(timing, text="Repeat:", style="Muted.TLabel").grid(row=1, column=3, sticky="e")
         self.repeat_count = tk.StringVar(value="0")
@@ -157,6 +160,7 @@ class App:
         self.btn_start.grid(row=0, column=0, padx=(0, 8))
         self.btn_stop = ttk.Button(buttons, text="Stop", command=self.on_stop, state="disabled", width=12)
         self.btn_stop.grid(row=0, column=1)
+        ttk.Label(buttons, text="F9", style="Hint.TLabel").grid(row=1, column=0, columnspan=2, pady=(2, 0))
 
         status_bar = ttk.Frame(main, style="Status.TFrame")
         status_bar.grid(row=3, column=0, sticky="ew", pady=(10, 0))
@@ -292,6 +296,17 @@ class App:
         self.btn_stop.configure(state="disabled")
         self.status.set("Stopped.")
 
+    def on_toggle_hotkey(self, _event=None):
+        if self.running:
+            self.on_stop()
+        else:
+            self.on_start()
+
+    def _on_global_key(self, key):
+        if key != keyboard.Key.f9:
+            return
+        self.root.after(0, self.on_toggle_hotkey)
+
     def loop(self, interval_ms, delay_s, repeat_count):
         btn = CLICK_BUTTON.get(self.click_type.get(), "1")
         interval_s = max(interval_ms / 1000.0, 0)
@@ -365,6 +380,7 @@ class App:
         style.configure("TButton", padding=(4, 3))
         style.configure("TEntry", fieldbackground="#ffffff", foreground="#0f172a")
         style.configure("TCombobox", fieldbackground="#ffffff", foreground="#0f172a")
+        style.configure("Hint.TLabel", background="#f1f5f9", foreground="#64748b", font=("Segoe UI", 7))
         style.map(
             "TCombobox",
             fieldbackground=[("readonly", "#ffffff")],
