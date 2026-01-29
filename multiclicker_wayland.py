@@ -196,14 +196,22 @@ class App:
             return
         overlay = tk.Toplevel(self.root)
         self.capture_overlay = overlay
-        overlay.attributes("-fullscreen", True)
+        overlay.overrideredirect(True)
         overlay.attributes("-topmost", True)
         overlay.attributes("-alpha", 0.01)
         overlay.configure(cursor="crosshair", bg="black")
-        overlay.overrideredirect(True)
+        overlay.geometry(self._screen_geometry())
+        overlay.update_idletasks()
+        overlay.lift()
+        overlay.grab_set()
         overlay.bind("<Button-1>", self._on_overlay_click)
         overlay.bind("<Escape>", self._on_overlay_cancel)
         overlay.focus_set()
+
+    def _screen_geometry(self):
+        width = self.root.winfo_screenwidth()
+        height = self.root.winfo_screenheight()
+        return f"{width}x{height}+0+0"
 
     def _on_overlay_click(self, event):
         x, y = int(event.x_root), int(event.y_root)
@@ -218,6 +226,10 @@ class App:
     def _end_overlay_capture(self):
         if self.capture_overlay is None:
             return
+        try:
+            self.capture_overlay.grab_release()
+        except Exception:
+            pass
         try:
             self.capture_overlay.destroy()
         except Exception:
