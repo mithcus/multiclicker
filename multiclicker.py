@@ -25,7 +25,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("MultiClicker")
-        self.root.minsize(680, 540)
+        self.root.minsize(560, 420)
 
         self.points = []
         self.running = False
@@ -40,7 +40,7 @@ class App:
         # --- UI ---
         self._setup_style()
 
-        main = ttk.Frame(root, padding=20, style="App.TFrame")
+        main = ttk.Frame(root, padding=12, style="App.TFrame")
         main.grid(row=0, column=0, sticky="nsew")
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
@@ -50,19 +50,17 @@ class App:
         header = ttk.Frame(main, style="App.TFrame")
         header.grid(row=0, column=0, sticky="ew")
         header.columnconfigure(0, weight=1)
-        ttk.Label(
-            header,
-            text="MultiClicker",
-            style="Header.TLabel",
-        ).grid(row=0, column=0, sticky="w")
+        ttk.Label(header, text="MultiClicker", style="Header.TLabel").grid(
+            row=0, column=0, sticky="w"
+        )
         ttk.Label(
             header,
             text="Capture points, tune timing, and automate clicks across multiple locations.",
             style="Subheader.TLabel",
         ).grid(row=1, column=0, sticky="w", pady=(4, 0))
 
-        controls = ttk.LabelFrame(main, text="Controls", padding=16, style="Card.TLabelframe")
-        controls.grid(row=1, column=0, sticky="ew", pady=(16, 0))
+        controls = ttk.LabelFrame(main, text="Controls", padding=12, style="Card.TLabelframe")
+        controls.grid(row=1, column=0, sticky="ew", pady=(10, 0))
         controls.columnconfigure(0, weight=1)
         controls.columnconfigure(1, weight=1)
 
@@ -76,54 +74,69 @@ class App:
             command=self.on_get,
             style="Accent.TButton",
         )
-        self.btn_get.grid(row=0, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
+        self.btn_get.grid(row=0, column=0, padx=(0, 8), pady=(0, 8), sticky="w")
 
         ttk.Button(actions, text="Remove selected", command=self.on_remove).grid(
-            row=0, column=1, padx=(0, 10), pady=(0, 10), sticky="w"
+            row=0, column=1, padx=(0, 8), pady=(0, 8), sticky="w"
         )
         ttk.Button(actions, text="Clear all", command=self.on_clear).grid(
-            row=0, column=2, padx=(0, 16), pady=(0, 10), sticky="w"
+            row=0, column=2, padx=(0, 12), pady=(0, 8), sticky="w"
         )
 
-        ttk.Label(actions, text="Click type:", style="Muted.TLabel").grid(row=0, column=3, sticky="e")
+        ttk.Label(actions, text="Click type:", style="Muted.TLabel").grid(
+            row=0, column=3, sticky="e"
+        )
         self.click_type = tk.StringVar(value="Left")
         ttk.Combobox(
             actions, textvariable=self.click_type,
             values=list(CLICK_BUTTON.keys()), state="readonly", width=8
-        ).grid(row=0, column=4, padx=(6, 0), pady=(0, 10), sticky="w")
+        ).grid(row=0, column=4, padx=(6, 0), pady=(0, 8), sticky="w")
 
         timing = ttk.Frame(controls, style="App.TFrame")
         timing.grid(row=0, column=1, sticky="ew")
         timing.columnconfigure(5, weight=1)
 
-        ttk.Label(timing, text="Interval (ms):", style="Muted.TLabel").grid(row=0, column=0, sticky="e")
+        ttk.Label(timing, text="Interval (ms):", style="Muted.TLabel").grid(
+            row=0, column=0, sticky="e"
+        )
         self.interval_ms = tk.StringVar(value="200")
-        ttk.Entry(timing, textvariable=self.interval_ms, width=8).grid(row=0, column=1, padx=(6, 16))
+        ttk.Entry(timing, textvariable=self.interval_ms, width=6).grid(
+            row=0, column=1, padx=(6, 12)
+        )
 
-        ttk.Label(timing, text="Start delay (s):", style="Muted.TLabel").grid(row=0, column=2, sticky="e")
+        ttk.Label(timing, text="Start delay (s):", style="Muted.TLabel").grid(
+            row=0, column=2, sticky="e"
+        )
         self.start_delay = tk.StringVar(value="0")
-        ttk.Entry(timing, textvariable=self.start_delay, width=8).grid(row=0, column=3, padx=(6, 16))
+        ttk.Entry(timing, textvariable=self.start_delay, width=6).grid(
+            row=0, column=3, padx=(6, 12)
+        )
 
-        ttk.Label(timing, text="Repeat:", style="Muted.TLabel").grid(row=0, column=4, sticky="e")
+        ttk.Label(timing, text="Repeat:", style="Muted.TLabel").grid(
+            row=0, column=4, sticky="e"
+        )
         self.repeat_count = tk.StringVar(value="0")
-        ttk.Entry(timing, textvariable=self.repeat_count, width=6).grid(row=0, column=5, padx=(6, 12))
+        ttk.Entry(timing, textvariable=self.repeat_count, width=5).grid(
+            row=0, column=5, padx=(6, 10)
+        )
         ttk.Label(timing, text="(0 = forever)", style="Muted.TLabel").grid(row=0, column=6, sticky="w")
 
         self.restore_mouse = tk.BooleanVar(value=True)
         options = ttk.Frame(controls, style="App.TFrame")
         options.grid(row=1, column=0, sticky="ew")
-        ttk.Checkbutton(options, text="Restore mouse position", variable=self.restore_mouse)\
-            .grid(row=0, column=0, pady=(2, 0), sticky="w")
+        ttk.Checkbutton(
+            options, text="Restore mouse position", variable=self.restore_mouse
+        ).grid(row=0, column=0, pady=(2, 0), sticky="w")
 
         run_actions = ttk.Frame(controls, style="App.TFrame")
         run_actions.grid(row=1, column=1, sticky="e")
         self.btn_start = ttk.Button(run_actions, text="Start", command=self.on_start, style="Accent.TButton")
-        self.btn_start.grid(row=0, column=0, padx=(0, 8), pady=(2, 0))
+        self.btn_start.grid(row=0, column=0, padx=(0, 6), pady=(2, 0))
         self.btn_stop = ttk.Button(run_actions, text="Stop", command=self.on_stop, state="disabled")
         self.btn_stop.grid(row=0, column=1, pady=(2, 0))
 
-        points_card = ttk.LabelFrame(main, text="Click points", padding=16, style="Card.TLabelframe")
-        points_card.grid(row=2, column=0, sticky="nsew", pady=(16, 0))
+        points_card = ttk.LabelFrame(main, text="Click points", padding=12, style="Card.TLabelframe")
+        points_card.grid(row=2, column=0, sticky="nsew", pady=(10, 0))
         points_card.columnconfigure(0, weight=1)
         points_card.rowconfigure(1, weight=1)
 
@@ -131,7 +144,7 @@ class App:
             points_card,
             text="Order matters. Use the arrows to reorder points.",
             style="Muted.TLabel",
-        ).grid(row=0, column=0, sticky="w", pady=(0, 8))
+        ).grid(row=0, column=0, sticky="w", pady=(0, 6))
 
         table_frame = ttk.Frame(points_card, style="App.TFrame")
         table_frame.grid(row=1, column=0, sticky="nsew")
@@ -142,13 +155,13 @@ class App:
             table_frame,
             columns=("x", "y"),
             show="headings",
-            height=10,
+            height=7,
             selectmode="extended",
         )
         self.points_table.heading("x", text="X")
         self.points_table.heading("y", text="Y")
-        self.points_table.column("x", width=120, anchor="center")
-        self.points_table.column("y", width=120, anchor="center")
+        self.points_table.column("x", width=80, anchor="center")
+        self.points_table.column("y", width=80, anchor="center")
         self.points_table.grid(row=0, column=0, sticky="nsew")
 
         sb = ttk.Scrollbar(table_frame, orient="vertical", command=self.points_table.yview)
@@ -156,12 +169,14 @@ class App:
         self.points_table.configure(yscrollcommand=sb.set)
 
         reorder = ttk.Frame(points_card, style="App.TFrame")
-        reorder.grid(row=2, column=0, sticky="w", pady=(10, 0))
-        ttk.Button(reorder, text="Move up", command=self.on_move_up).grid(row=0, column=0, padx=(0, 10))
+        reorder.grid(row=2, column=0, sticky="w", pady=(6, 0))
+        ttk.Button(reorder, text="Move up", command=self.on_move_up).grid(
+            row=0, column=0, padx=(0, 8)
+        )
         ttk.Button(reorder, text="Move down", command=self.on_move_down).grid(row=0, column=1)
 
         status_bar = ttk.Frame(main, style="Status.TFrame")
-        status_bar.grid(row=3, column=0, sticky="ew", pady=(16, 0))
+        status_bar.grid(row=3, column=0, sticky="ew", pady=(10, 0))
         status_bar.columnconfigure(0, weight=1)
         self.status = tk.StringVar(value="Ready to capture your first point.")
         ttk.Label(status_bar, textvariable=self.status, style="Status.TLabel").grid(
@@ -339,32 +354,46 @@ class App:
     def _setup_style(self):
         style = ttk.Style()
         style.theme_use("clam")
-        self.root.configure(bg="#0b1120")
+        self.root.configure(bg="#f1f5f9")
 
-        style.configure("App.TFrame", background="#0b1120")
-        style.configure("Card.TLabelframe", background="#111827", foreground="#e5e7eb")
-        style.configure("Card.TLabelframe.Label", background="#111827", foreground="#e5e7eb")
-        style.configure("Header.TLabel", background="#0b1120", foreground="#f9fafb", font=("Segoe UI", 18, "bold"))
-        style.configure("Subheader.TLabel", background="#0b1120", foreground="#9ca3af", font=("Segoe UI", 10))
-        style.configure("Muted.TLabel", background="#111827", foreground="#9ca3af", font=("Segoe UI", 9))
-        style.configure("Status.TFrame", background="#111827")
-        style.configure("Status.TLabel", background="#111827", foreground="#e5e7eb", font=("Segoe UI", 10))
-        style.configure("Accent.TButton", background="#6366f1", foreground="#f8fafc", font=("Segoe UI", 10, "bold"))
+        style.configure("App.TFrame", background="#f1f5f9")
+        style.configure("Card.TLabelframe", background="#ffffff", foreground="#0f172a")
+        style.configure("Card.TLabelframe.Label", background="#ffffff", foreground="#0f172a")
+        style.configure(
+            "Header.TLabel", background="#f1f5f9", foreground="#0f172a", font=("Segoe UI", 16, "bold")
+        )
+        style.configure(
+            "Subheader.TLabel", background="#f1f5f9", foreground="#475569", font=("Segoe UI", 9)
+        )
+        style.configure("Muted.TLabel", background="#ffffff", foreground="#64748b", font=("Segoe UI", 9))
+        style.configure("Status.TFrame", background="#e2e8f0")
+        style.configure(
+            "Status.TLabel", background="#e2e8f0", foreground="#334155", font=("Segoe UI", 9)
+        )
+        style.configure(
+            "Accent.TButton", background="#2563eb", foreground="#f8fafc", font=("Segoe UI", 9, "bold")
+        )
         style.map(
             "Accent.TButton",
-            background=[("active", "#818cf8")],
+            background=[("active", "#3b82f6")],
             foreground=[("active", "#f8fafc")],
         )
-        style.configure("TButton", padding=6)
-        style.configure("TEntry", fieldbackground="#0b1220", foreground="#e5e7eb")
-        style.configure("TCombobox", fieldbackground="#0b1220", foreground="#e5e7eb")
+        style.configure("TButton", padding=(6, 4))
+        style.configure("TEntry", fieldbackground="#ffffff", foreground="#0f172a")
+        style.configure("TCombobox", fieldbackground="#ffffff", foreground="#0f172a")
         style.map(
             "TCombobox",
-            fieldbackground=[("readonly", "#0b1220")],
-            foreground=[("readonly", "#e5e7eb")],
+            fieldbackground=[("readonly", "#ffffff")],
+            foreground=[("readonly", "#0f172a")],
         )
-        style.configure("Treeview", background="#0b1220", foreground="#e5e7eb", fieldbackground="#0b1220")
-        style.configure("Treeview.Heading", background="#111827", foreground="#e5e7eb")
+        style.configure(
+            "Treeview",
+            background="#ffffff",
+            foreground="#0f172a",
+            fieldbackground="#ffffff",
+            rowheight=22,
+        )
+        style.configure("Treeview.Heading", background="#e2e8f0", foreground="#0f172a")
 
 def main():
     root = tk.Tk()
