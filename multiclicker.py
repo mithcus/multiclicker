@@ -25,7 +25,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("MultiClicker")
-        self.root.minsize(760, 520)
+        self.root.minsize(680, 540)
 
         self.points = []
         self.running = False
@@ -63,47 +63,64 @@ class App:
 
         controls = ttk.LabelFrame(main, text="Controls", padding=16, style="Card.TLabelframe")
         controls.grid(row=1, column=0, sticky="ew", pady=(16, 0))
-        controls.columnconfigure(9, weight=1)
+        controls.columnconfigure(0, weight=1)
+        controls.columnconfigure(1, weight=1)
+
+        actions = ttk.Frame(controls, style="App.TFrame")
+        actions.grid(row=0, column=0, sticky="ew")
+        actions.columnconfigure(3, weight=1)
 
         self.btn_get = ttk.Button(
-            controls,
+            actions,
             text="Capture next click",
             command=self.on_get,
             style="Accent.TButton",
         )
-        self.btn_get.grid(row=0, column=0, padx=(0, 10))
+        self.btn_get.grid(row=0, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
-        ttk.Button(controls, text="Remove selected", command=self.on_remove).grid(row=0, column=1, padx=(0, 10))
-        ttk.Button(controls, text="Clear all", command=self.on_clear).grid(row=0, column=2, padx=(0, 16))
+        ttk.Button(actions, text="Remove selected", command=self.on_remove).grid(
+            row=0, column=1, padx=(0, 10), pady=(0, 10), sticky="w"
+        )
+        ttk.Button(actions, text="Clear all", command=self.on_clear).grid(
+            row=0, column=2, padx=(0, 16), pady=(0, 10), sticky="w"
+        )
 
-        ttk.Label(controls, text="Click type:", style="Muted.TLabel").grid(row=0, column=3, sticky="e")
+        ttk.Label(actions, text="Click type:", style="Muted.TLabel").grid(row=0, column=3, sticky="e")
         self.click_type = tk.StringVar(value="Left")
         ttk.Combobox(
-            controls, textvariable=self.click_type,
+            actions, textvariable=self.click_type,
             values=list(CLICK_BUTTON.keys()), state="readonly", width=8
-        ).grid(row=0, column=4, padx=(6, 16))
+        ).grid(row=0, column=4, padx=(6, 0), pady=(0, 10), sticky="w")
 
-        ttk.Label(controls, text="Interval (ms):", style="Muted.TLabel").grid(row=0, column=5, sticky="e")
+        timing = ttk.Frame(controls, style="App.TFrame")
+        timing.grid(row=0, column=1, sticky="ew")
+        timing.columnconfigure(5, weight=1)
+
+        ttk.Label(timing, text="Interval (ms):", style="Muted.TLabel").grid(row=0, column=0, sticky="e")
         self.interval_ms = tk.StringVar(value="200")
-        ttk.Entry(controls, textvariable=self.interval_ms, width=8).grid(row=0, column=6, padx=(6, 16))
+        ttk.Entry(timing, textvariable=self.interval_ms, width=8).grid(row=0, column=1, padx=(6, 16))
 
-        ttk.Label(controls, text="Start delay (s):", style="Muted.TLabel").grid(row=0, column=7, sticky="e")
+        ttk.Label(timing, text="Start delay (s):", style="Muted.TLabel").grid(row=0, column=2, sticky="e")
         self.start_delay = tk.StringVar(value="0")
-        ttk.Entry(controls, textvariable=self.start_delay, width=8).grid(row=0, column=8, padx=(6, 16))
+        ttk.Entry(timing, textvariable=self.start_delay, width=8).grid(row=0, column=3, padx=(6, 16))
 
-        ttk.Label(controls, text="Repeat:", style="Muted.TLabel").grid(row=0, column=9, sticky="e")
+        ttk.Label(timing, text="Repeat:", style="Muted.TLabel").grid(row=0, column=4, sticky="e")
         self.repeat_count = tk.StringVar(value="0")
-        ttk.Entry(controls, textvariable=self.repeat_count, width=6).grid(row=0, column=10, padx=(6, 16))
-        ttk.Label(controls, text="(0 = forever)", style="Muted.TLabel").grid(row=0, column=11, sticky="w")
+        ttk.Entry(timing, textvariable=self.repeat_count, width=6).grid(row=0, column=5, padx=(6, 12))
+        ttk.Label(timing, text="(0 = forever)", style="Muted.TLabel").grid(row=0, column=6, sticky="w")
 
         self.restore_mouse = tk.BooleanVar(value=True)
-        ttk.Checkbutton(controls, text="Restore mouse position", variable=self.restore_mouse)\
-            .grid(row=1, column=0, columnspan=3, pady=(10, 0), sticky="w")
+        options = ttk.Frame(controls, style="App.TFrame")
+        options.grid(row=1, column=0, sticky="ew")
+        ttk.Checkbutton(options, text="Restore mouse position", variable=self.restore_mouse)\
+            .grid(row=0, column=0, pady=(2, 0), sticky="w")
 
-        self.btn_start = ttk.Button(controls, text="Start", command=self.on_start, style="Accent.TButton")
-        self.btn_start.grid(row=1, column=9, padx=(0, 8), pady=(10, 0), sticky="e")
-        self.btn_stop = ttk.Button(controls, text="Stop", command=self.on_stop, state="disabled")
-        self.btn_stop.grid(row=1, column=10, pady=(10, 0), sticky="w")
+        run_actions = ttk.Frame(controls, style="App.TFrame")
+        run_actions.grid(row=1, column=1, sticky="e")
+        self.btn_start = ttk.Button(run_actions, text="Start", command=self.on_start, style="Accent.TButton")
+        self.btn_start.grid(row=0, column=0, padx=(0, 8), pady=(2, 0))
+        self.btn_stop = ttk.Button(run_actions, text="Stop", command=self.on_stop, state="disabled")
+        self.btn_stop.grid(row=0, column=1, pady=(2, 0))
 
         points_card = ttk.LabelFrame(main, text="Click points", padding=16, style="Card.TLabelframe")
         points_card.grid(row=2, column=0, sticky="nsew", pady=(16, 0))
@@ -322,32 +339,32 @@ class App:
     def _setup_style(self):
         style = ttk.Style()
         style.theme_use("clam")
-        self.root.configure(bg="#0f172a")
+        self.root.configure(bg="#0b1120")
 
-        style.configure("App.TFrame", background="#0f172a")
-        style.configure("Card.TLabelframe", background="#111827", foreground="#e2e8f0")
-        style.configure("Card.TLabelframe.Label", background="#111827", foreground="#e2e8f0")
-        style.configure("Header.TLabel", background="#0f172a", foreground="#f8fafc", font=("Segoe UI", 18, "bold"))
-        style.configure("Subheader.TLabel", background="#0f172a", foreground="#94a3b8", font=("Segoe UI", 10))
-        style.configure("Muted.TLabel", background="#111827", foreground="#94a3b8", font=("Segoe UI", 9))
+        style.configure("App.TFrame", background="#0b1120")
+        style.configure("Card.TLabelframe", background="#111827", foreground="#e5e7eb")
+        style.configure("Card.TLabelframe.Label", background="#111827", foreground="#e5e7eb")
+        style.configure("Header.TLabel", background="#0b1120", foreground="#f9fafb", font=("Segoe UI", 18, "bold"))
+        style.configure("Subheader.TLabel", background="#0b1120", foreground="#9ca3af", font=("Segoe UI", 10))
+        style.configure("Muted.TLabel", background="#111827", foreground="#9ca3af", font=("Segoe UI", 9))
         style.configure("Status.TFrame", background="#111827")
-        style.configure("Status.TLabel", background="#111827", foreground="#e2e8f0", font=("Segoe UI", 10))
-        style.configure("Accent.TButton", background="#38bdf8", foreground="#0f172a", font=("Segoe UI", 10, "bold"))
+        style.configure("Status.TLabel", background="#111827", foreground="#e5e7eb", font=("Segoe UI", 10))
+        style.configure("Accent.TButton", background="#6366f1", foreground="#f8fafc", font=("Segoe UI", 10, "bold"))
         style.map(
             "Accent.TButton",
-            background=[("active", "#7dd3fc")],
-            foreground=[("active", "#0f172a")],
+            background=[("active", "#818cf8")],
+            foreground=[("active", "#f8fafc")],
         )
         style.configure("TButton", padding=6)
-        style.configure("TEntry", fieldbackground="#0b1220", foreground="#e2e8f0")
-        style.configure("TCombobox", fieldbackground="#0b1220", foreground="#e2e8f0")
+        style.configure("TEntry", fieldbackground="#0b1220", foreground="#e5e7eb")
+        style.configure("TCombobox", fieldbackground="#0b1220", foreground="#e5e7eb")
         style.map(
             "TCombobox",
             fieldbackground=[("readonly", "#0b1220")],
-            foreground=[("readonly", "#e2e8f0")],
+            foreground=[("readonly", "#e5e7eb")],
         )
-        style.configure("Treeview", background="#0b1220", foreground="#e2e8f0", fieldbackground="#0b1220")
-        style.configure("Treeview.Heading", background="#111827", foreground="#e2e8f0")
+        style.configure("Treeview", background="#0b1220", foreground="#e5e7eb", fieldbackground="#0b1220")
+        style.configure("Treeview.Heading", background="#111827", foreground="#e5e7eb")
 
 def main():
     root = tk.Tk()
