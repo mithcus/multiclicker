@@ -5,7 +5,7 @@ import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from pynput import mouse
+from pynput import mouse, keyboard
 
 CLICK_BUTTON = {
     "Left": "1",
@@ -37,6 +37,8 @@ class App:
         self.capture_mode = False
         self.mouse_listener = mouse.Listener(on_click=self._on_global_click)
         self.mouse_listener.start()
+        self.keyboard_listener = keyboard.Listener(on_press=self._on_global_key)
+        self.keyboard_listener.start()
 
         # --- UI ---
         self._setup_style()
@@ -177,8 +179,6 @@ class App:
             messagebox.showerror("Missing dependency", "xdotool not found. Install: sudo apt install xdotool")
             self.status.set("xdotool missing.")
 
-        self.root.bind_all("<F9>", self.on_toggle_hotkey)
-
     def on_get(self):
         # Arm capture mode: next LEFT click anywhere will be captured
         if self.capture_mode:
@@ -301,6 +301,11 @@ class App:
             self.on_stop()
         else:
             self.on_start()
+
+    def _on_global_key(self, key):
+        if key != keyboard.Key.f9:
+            return
+        self.root.after(0, self.on_toggle_hotkey)
 
     def loop(self, interval_ms, delay_s, repeat_count):
         btn = CLICK_BUTTON.get(self.click_type.get(), "1")
