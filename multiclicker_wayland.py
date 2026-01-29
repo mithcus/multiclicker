@@ -179,18 +179,11 @@ class App:
 
         # Dependency sanity check
         if not shutil.which("ydotool"):
-            messagebox.showerror(
-                "Missing dependency",
-                "ydotool not found. Install ydotool (Wayland).",
-            )
-            self.status.set("ydotool missing.")
+            self.status.set("ydotool missing. Install ydotool (Wayland).")
         elif not os.path.exists(self.ydotool_socket):
-            messagebox.showwarning(
-                "ydotool daemon not running",
-                "ydotoold socket not found. Start it, for example:\n"
-                "sudo ydotoold --socket-path=/tmp/ydotoold.sock",
+            self.status.set(
+                "ydotoold socket not found. Start ydotoold before clicking."
             )
-            self.status.set("ydotoold not running.")
 
     def on_get(self):
         # Arm capture mode: fullscreen overlay lets us grab a point anywhere on-screen.
