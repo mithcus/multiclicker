@@ -198,11 +198,8 @@ class App:
 
     def _capture_after_delay(self):
         time.sleep(self.capture_delay_s)
-        if not os.path.exists(self.ydotool_socket):
-            self.root.after(0, lambda: self._finish_capture_error("ydotoold not running."))
-            return
         try:
-            x, y = get_mouse_xy()
+            x, y = self.root.winfo_pointerxy()
         except Exception:
             self.root.after(0, lambda: self._finish_capture_error("Could not read cursor position."))
             return
