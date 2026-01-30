@@ -1,46 +1,93 @@
 # MultiClicker
 
-MultiClicker is a simple GUI tool for capturing multiple mouse coordinates and replaying them
-as a configurable click sequence.
+MultiClicker is a simple GUI tool for capturing multiple mouse coordinates and replaying them as a configurable click sequence.
 
-## Run locally
+## Compatibility
+
+- **X11:** Full functionality (recommended).
+- **Wayland:** Global click capture / automation is limited by design (Wayland security model). For full functionality, log into an **X11 session**.
+
+## Run locally (Python)
 
 ```bash
 python3 multiclicker.py
 ```
 
-## Flatpak (Flathub) packaging
+## Flatpak packaging
 
-This repository includes a Flatpak manifest and metadata aimed at Flathub submission.
-X11-only support is intentional; Wayland is not enabled.
+This repository includes a Flatpak manifest and metadata intended for Flathub-style packaging.
 
-### Build & run (local Flatpak test)
+### Prerequisites
+
+- Flatpak installed
+- Flathub remote enabled
+- Flatpak Builder installed
+
+Install Builder (from Flathub):
 
 ```bash
-flatpak-builder --force-clean --user build-dir org.multiclicker.MultiClicker.yml
-flatpak-builder --run build-dir org.multiclicker.MultiClicker.yml multiclicker
+flatpak install -y flathub org.flatpak.Builder
 ```
 
-### Included metadata
+### Build a local Flatpak repo (recommended local test path)
+
+From the project directory:
+
+```bash
+rm -rf builddir repo .flatpak-builder
+
+flatpak run org.flatpak.Builder --force-clean   --repo=repo --install-deps-from=flathub   builddir org.multiclicker.MultiClicker.yml
+
+flatpak build-update-repo repo
+```
+
+### Install & run from the local repo (user)
+
+```bash
+flatpak remote-delete --user multiclicker-local 2>/dev/null || true
+flatpak remote-add --user --no-gpg-verify multiclicker-local file://$PWD/repo
+
+flatpak install --user -y multiclicker-local org.multiclicker.MultiClicker
+flatpak run org.multiclicker.MultiClicker
+```
+
+### Create a single-file bundle (.flatpak)
+
+```bash
+flatpak build-bundle repo multiclicker.flatpak org.multiclicker.MultiClicker master
+```
+
+Install/run the bundle:
+
+```bash
+flatpak install --user -y ./multiclicker.flatpak
+flatpak run org.multiclicker.MultiClicker
+```
+
+## Included packaging files
 
 - Flatpak manifest: `org.multiclicker.MultiClicker.yml`
 - Desktop file: `org.multiclicker.MultiClicker.desktop`
 - AppStream metadata: `org.multiclicker.MultiClicker.metainfo.xml`
 - App icon: `org.multiclicker.MultiClicker.svg`
-- License: `LICENSE` (MIT)
+- License: `LICENSE`
 
-### Flathub submission checklist (verified here)
+## Flatpak permissions
 
-- [x] App ID uses reverse-DNS format (`org.multiclicker.MultiClicker`).
-- [x] Desktop file and AppStream metadata IDs match the App ID.
-- [x] Metadata includes summary, description, license, categories, keywords, and content rating.
-- [x] Icon is provided in scalable SVG format.
-- [x] License file is included at the repository root.
-- [x] X11-only permissions configured (`--socket=x11`), Wayland not enabled.
-- [x] Dependencies are bundled (xdotool + Python dependency `pynput`).
+The manifest is intentionally **X11-only**:
 
-### Items to verify before publishing
+- `--socket=x11`
+- `--share=ipc`
 
-- [ ] Replace the AppStream homepage URL with the real project URL.
-- [ ] Consider adding screenshots to AppStream metadata for Flathub listing.
-- [ ] Confirm the icon and summary match your branding expectations.
+## Flathub notes / checklist
+
+Before submitting to Flathub, verify:
+
+- [ ] **App ID policy:** Flathub commonly expects `io.github.<user>.<repo>` for GitHub-hosted projects unless you control a matching domain/org.
+- [ ] AppStream homepage/contact URLs are correct.
+- [ ] Add screenshots (optional but recommended) and reference them in `metainfo.xml`.
+- [ ] Ensure all downloaded sources in the manifest are pinned (stable URL + correct sha256) for reproducible builds.
+
+## License
+
+MIT (see [LICENSE](LICENSE)).
