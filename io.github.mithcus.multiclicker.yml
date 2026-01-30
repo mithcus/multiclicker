@@ -1,4 +1,4 @@
-app-id: org.multiclicker.MultiClicker
+app-id: io.github.mithcus.multiclicker
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
@@ -142,15 +142,15 @@ modules:
         exec python3 /app/lib/multiclicker/multiclicker.py "$@"
         SH
       - chmod 755 /app/bin/multiclicker
-      - install -Dm644 org.multiclicker.MultiClicker.desktop /app/share/applications/org.multiclicker.MultiClicker.desktop
-      - install -Dm644 org.multiclicker.MultiClicker.metainfo.xml /app/share/metainfo/org.multiclicker.MultiClicker.metainfo.xml
-      - install -Dm644 org.multiclicker.MultiClicker.svg /app/share/icons/hicolor/scalable/apps/org.multiclicker.MultiClicker.svg
+      - install -Dm644 io.github.mithcus.multiclicker.desktop /app/share/applications/io.github.mithcus.multiclicker.desktop
+      - install -Dm644 io.github.mithcus.multiclicker.metainfo.xml /app/share/metainfo/io.github.mithcus.multiclicker.metainfo.xml
+      - install -Dm644 io.github.mithcus.multiclicker.svg /app/share/icons/hicolor/scalable/apps/io.github.mithcus.multiclicker.svg
     sources:
       - type: file
         path: multiclicker.py
       - type: file
-        path: org.multiclicker.MultiClicker.desktop
+        path: io.github.mithcus.multiclicker.desktop
       - type: file
-        path: org.multiclicker.MultiClicker.metainfo.xml
+        path: io.github.mithcus.multiclicker.metainfo.xml
       - type: file
-        path: org.multiclicker.MultiClicker.svg
+        path: io.github.mithcus.multiclicker.svg
