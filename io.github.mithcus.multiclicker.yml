@@ -146,11 +146,7 @@ modules:
       - install -Dm644 io.github.mithcus.multiclicker.metainfo.xml /app/share/metainfo/io.github.mithcus.multiclicker.metainfo.xml
       - install -Dm644 io.github.mithcus.multiclicker.svg /app/share/icons/hicolor/scalable/apps/io.github.mithcus.multiclicker.svg
     sources:
-      - type: file
-        path: multiclicker.py
-      - type: file
-        path: io.github.mithcus.multiclicker.desktop
-      - type: file
-        path: io.github.mithcus.multiclicker.metainfo.xml
-      - type: file
-        path: io.github.mithcus.multiclicker.svg
+      - type: git
+        url: https://github.com/mithcus/multiclicker.git
+        tag: v1.0.0
+        commit: 37baafc9eec8df44672e97de78ac68c101b3c945
