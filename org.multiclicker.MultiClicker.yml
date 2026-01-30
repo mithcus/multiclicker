@@ -1,0 +1,35 @@
+app-id: org.multiclicker.MultiClicker
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: multiclicker
+finish-args:
+  - --socket=x11
+  - --share=ipc
+modules:
+  - name: xdotool
+    buildsystem: simple
+    build-commands:
+      - make
+      - make PREFIX=/app install
+    sources:
+      - type: archive
+        url: https://github.com/jordansissel/xdotool/archive/refs/tags/v3.20211022.1.tar.gz
+        sha256: 86e4ab1c2cde2812c74e8c1317fb4d1ce350cd7c15163052f81f6d9cc23d6c7f
+  - name: multiclicker
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 multiclicker.py /app/bin/multiclicker
+      - install -Dm644 org.multiclicker.MultiClicker.desktop /app/share/applications/org.multiclicker.MultiClicker.desktop
+      - install -Dm644 org.multiclicker.MultiClicker.metainfo.xml /app/share/metainfo/org.multiclicker.MultiClicker.metainfo.xml
+      - install -Dm644 org.multiclicker.MultiClicker.svg /app/share/icons/hicolor/scalable/apps/org.multiclicker.MultiClicker.svg
+      - pip3 install --no-deps --prefix=/app pynput
+    sources:
+      - type: file
+        path: multiclicker.py
+      - type: file
+        path: org.multiclicker.MultiClicker.desktop
+      - type: file
+        path: org.multiclicker.MultiClicker.metainfo.xml
+      - type: file
+        path: org.multiclicker.MultiClicker.svg
