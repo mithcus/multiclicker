@@ -148,5 +148,5 @@ modules:
     sources:
       - type: git
         url: https://github.com/mithcus/multiclicker.git
-        tag: v1.0.0
-        commit: 37baafc9eec8df44672e97de78ac68c101b3c945
+        tag: v1.0.1
+        commit: a2bba7976603586e3d880b1f8c242779c4d57936
