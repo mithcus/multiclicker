@@ -1,0 +1,5 @@
+# Flatpak build artifacts
+builddir/
+.flatpak-builder/
+repo/
+*.flatpak
