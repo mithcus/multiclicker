@@ -1,5 +1,4 @@
-# Flatpak build artifacts
-builddir/
-.flatpak-builder/
-repo/
-*.flatpak
+__pycache__/
+*.pyc
+.venv/
+.python-version
