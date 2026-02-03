@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.mithcus.multiclicker</id>
+  <id>com.multiclicker.MultiClicker</id>
   <name>MultiClicker</name>
   <summary>Automate repeating mouse clicks across multiple points</summary>
   <metadata_license>CC0-1.0</metadata_license>
@@ -15,7 +15,7 @@
       This build targets X11 only and uses xdotool for click automation.
     </p>
   </description>
-  <launchable type="desktop-id">io.github.mithcus.multiclicker.desktop</launchable>
+  <launchable type="desktop-id">multiclicker.desktop</launchable>
   <categories>
     <category>Utility</category>
   </categories>
@@ -24,7 +24,7 @@
     <keyword>clicker</keyword>
     <keyword>automation</keyword>
   </keywords>
-  <url type="homepage">https://example.com/multiclicker</url>
+  <url type="homepage">https://github.com/mithcus/multiclicker</url>
   <developer_name>MultiClicker Contributors</developer_name>
   <content_rating type="oars-1.1"/>
 </component>
